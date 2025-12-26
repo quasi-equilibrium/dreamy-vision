@@ -93,10 +93,14 @@ if (document.getElementById('descriptionInput')) {
             submitDescription.disabled = true;
             drawingSection.classList.remove('hidden');
             
-            // Initialize canvas after image loads
-            patternImage.onload = () => {
-                initCanvas();
-            };
+            // Initialize canvas - wait a bit for DOM to update
+            setTimeout(() => {
+                if (patternImage.complete) {
+                    initCanvas();
+                } else {
+                    patternImage.addEventListener('load', initCanvas, { once: true });
+                }
+            }, 100);
         }
     });
     

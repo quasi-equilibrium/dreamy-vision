@@ -7,23 +7,53 @@ let currentStroke = [];
 
 function initCanvas() {
     canvas = document.getElementById('drawingCanvas');
-    if (!canvas) return;
+    if (!canvas) {
+        console.error('Canvas not found');
+        return;
+    }
     
     ctx = canvas.getContext('2d');
     const patternImage = document.getElementById('patternImage');
     
-    // Set canvas size to match image
-    canvas.width = patternImage.offsetWidth;
-    canvas.height = patternImage.offsetHeight;
+    if (!patternImage) {
+        console.error('Pattern image not found');
+        return;
+    }
     
-    // Set drawing style
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 3;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
+    // Wait for image to be fully loaded and rendered
+    function setupCanvas() {
+        // Get the actual displayed size of the image
+        const imgWidth = patternImage.offsetWidth || patternImage.naturalWidth;
+        const imgHeight = patternImage.offsetHeight || patternImage.naturalHeight;
+        
+        if (imgWidth === 0 || imgHeight === 0) {
+            console.error('Image dimensions are zero');
+            return;
+        }
+        
+        // Set canvas size to match image
+        canvas.width = imgWidth;
+        canvas.height = imgHeight;
+        
+        // Set drawing style
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        
+        setupEventListeners();
+        updateButtonStates();
+        
+        console.log('Canvas initialized:', canvas.width, 'x', canvas.height);
+    }
     
-    setupEventListeners();
-    updateButtonStates();
+    // If image is already loaded
+    if (patternImage.complete && patternImage.naturalWidth > 0) {
+        setupCanvas();
+    } else {
+        // Wait for image to load
+        patternImage.addEventListener('load', setupCanvas, { once: true });
+    }
 }
 
 function setupEventListeners() {
