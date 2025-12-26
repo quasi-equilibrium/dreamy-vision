@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dreamy Vision - What do you see?</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="drawing-container">
+            <div class="drawing-header">
+                <h2 class="dreamy-question">What do you see here?</h2>
+                <div class="input-group">
+                    <input type="text" id="descriptionInput" placeholder="e.g., dinosaur, face, plane..." class="dreamy-input">
+                    <button id="submitDescription" class="dreamy-button-small">Submit</button>
+                </div>
+            </div>
+            
+            <div id="drawingSection" class="drawing-section hidden">
+                <div class="canvas-container">
+                    <canvas id="drawingCanvas"></canvas>
+                    <img id="patternImage" src="" alt="Pattern" class="pattern-image">
+                </div>
+                
+                <div class="drawing-controls">
+                    <button id="undoBtn" class="control-btn" disabled>Undo</button>
+                    <button id="resetBtn" class="control-btn">Reset</button>
+                    <button id="okBtn" class="dreamy-button" disabled>OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="js/canvas.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
+
