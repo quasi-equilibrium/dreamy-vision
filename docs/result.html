@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dreamy Vision - Your Vision</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="result-container">
+            <h2 class="dreamy-title">Your Vision</h2>
+            
+            <div id="loadingSection" class="loading-section">
+                <div class="spinner"></div>
+                <p class="loading-text">Bringing your vision to life...</p>
+            </div>
+            
+            <div id="resultSection" class="result-section hidden">
+                <div class="result-image-container">
+                    <img id="resultImage" src="" alt="Enhanced result">
+                </div>
+                
+                <div class="result-controls">
+                    <button id="downloadBtn" class="dreamy-button">Download</button>
+                    <button id="tryAgainBtn" class="dreamy-button-secondary">Try Again</button>
+                    <button id="startOverBtn" class="dreamy-button-secondary">Start Over</button>
+                </div>
+            </div>
+            
+            <div id="errorSection" class="error-section hidden">
+                <p class="error-message"></p>
+                <button id="retryBtn" class="dreamy-button">Retry</button>
+                <button id="goBackBtn" class="dreamy-button-secondary">Go Back</button>
+            </div>
+        </div>
+    </div>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
+
