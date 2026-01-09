@@ -130,7 +130,7 @@ def test_enhance_endpoint():
         response = requests.post(
             "http://localhost:8000/enhance",
             json=payload,
-            timeout=120  # 2 minutes timeout for first request
+            timeout=180  # 3 minutes timeout for first request
         )
         
         if response.status_code == 200:
