@@ -81,31 +81,68 @@ See `run_GLONET.ipynb` in the repo for full workflow.
 
 ## 4. Trade / Market Forecasting Models
 
-### Time Series Foundation Models (for stocks, crypto, etc.)
+### Google TimesFM (Simple Overview)
+
+**What it is:** A time series model from Google Research. You give it past values, it predicts future values. No training needed.
+
+**Repo:** https://github.com/google-research/timesfm
+
+| Version | Params | Context | Horizon |
+|---------|--------|---------|---------|
+| **2.5** (latest) | 200M | 16k steps | Up to 1k |
+| 2.0 | 500M | 2k | Any |
+
+**Main features:**
+- Zero-shot (use as-is)
+- Point forecasts + quantile forecasts (uncertainty)
+- Optional covariates (extra variables)
+- PyTorch or Flax
+
+**Install:**
+```bash
+git clone https://github.com/google-research/timesfm.git && cd timesfm
+uv venv && source .venv/bin/activate
+uv pip install -e .[torch]
+```
+
+**Minimal example:**
+```python
+import timesfm
+import numpy as np
+
+model = timesfm.TimesFM_2p5_200M_torch.from_pretrained("google/timesfm-2.5-200m-pytorch")
+model.compile(timesfm.ForecastConfig(max_context=1024, max_horizon=256))
+
+# Input: list of 1D arrays (your time series)
+point, quantiles = model.forecast(horizon=12, inputs=[np.array([1,2,3,...])])
+# point = predicted values, quantiles = percentiles
+```
+
+**Hugging Face:** https://huggingface.co/collections/google/timesfm-release-66e4be5fdb56e960c1e482a6
+
+---
+
+### Other Options (Quick Compare)
 
 | Model | Params | Best For |
 |-------|--------|----------|
-| **Chronos-2** | 120M | Multivariate, covariates, SOTA |
-| **Chronos-Bolt** | 9M–205M | Fast, zero-shot, single series |
-| **Google TimesFM** | 200M–500M | Univariate, long context |
-| Chronos T5 | 46M–710M | Legacy option |
+| **Chronos-2** | 120M | Multiple variables, covariates |
+| **Chronos-Bolt** | 9M–205M | Fast, single series |
+| **TimesFM** | 200M | Long context, quantiles |
 
-### Chronos-2 (multivariate + covariates)
+**Chronos-Bolt (simplest):**
+```python
+pip install autogluon
+from autogluon.timeseries import TimeSeriesPredictor, TimeSeriesDataFrame
+predictor = TimeSeriesPredictor(prediction_length=24).fit(df, hyperparameters={"Chronos": {"model_path": "autogluon/chronos-bolt-small"}})
+predictions = predictor.predict(df)
+```
 
+**Chronos-2 (multivariate):**
 ```python
 pip install "chronos-forecasting>=2.0"
 from chronos import Chronos2Pipeline
 pipeline = Chronos2Pipeline.from_pretrained("amazon/chronos-2", device_map="cuda")
-```
-
-### Chronos-Bolt (fast, simple)
-
-```python
-pip install autogluon
-from autogluon.timeseries import TimeSeriesPredictor, TimeSeriesDataFrame
-# df: item_id, timestamp, target
-predictor = TimeSeriesPredictor(prediction_length=24).fit(df, hyperparameters={"Chronos": {"model_path": "autogluon/chronos-bolt-small"}})
-predictions = predictor.predict(df)
 ```
 
 ---
@@ -158,5 +195,6 @@ predictions = predictor.predict(df)
 | Image gen (M2 Max 32GB) | FLUX.2-klein-4B or 9B |
 | LLM (Ollama) | qwen2.5:32b |
 | Ocean forecast | mercator-ocean/GLONET |
-| Trade/crypto forecast | Chronos-2, Chronos-Bolt |
-| Polymarket 5-min BTC | LightGBM classifier + Polymarket odds |
+| Time series (zero-shot) | TimesFM, Chronos-Bolt |
+| Time series (multivariate) | Chronos-2 |
+| Polymarket 5-min BTC | LightGBM + Polymarket odds |
