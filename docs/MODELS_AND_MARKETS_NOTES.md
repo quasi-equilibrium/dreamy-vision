@@ -188,6 +188,69 @@ pipeline = Chronos2Pipeline.from_pretrained("amazon/chronos-2", device_map="cuda
 
 ---
 
+### How to Use TimesFM for Polymarket
+
+**Flow:** Get BTC prices → Forecast next 5 min → Up if forecast ↑, Down if ↓ → Compare to Polymarket odds → Trade if edge exists.
+
+**1. Get BTC price history (1-min candles)**
+
+```python
+# Example: Binance 1-min candles (or use Chainlink if available)
+import requests
+url = "https://api.binance.com/api/v3/klines"
+params = {"symbol": "BTCUSDT", "interval": "1m", "limit": 120}  # last 2 hours
+r = requests.get(url, params=params)
+prices = [float(c[4]) for c in r.json()]  # closing prices
+```
+
+**2. Run TimesFM**
+
+```python
+import timesfm
+import numpy as np
+
+model = timesfm.TimesFM_2p5_200M_torch.from_pretrained("google/timesfm-2.5-200m-pytorch")
+model.compile(timesfm.ForecastConfig(max_context=512, max_horizon=5))
+
+# horizon=5 = next 5 one-min points
+point, quantiles = model.forecast(horizon=5, inputs=[np.array(prices)])
+
+end_price_pred = point[0][-1]  # predicted price in 5 min
+start_price = prices[-1]
+direction = "Up" if end_price_pred >= start_price else "Down"
+```
+
+**3. Get Polymarket odds**
+
+```python
+import requests
+# event slug uses window start timestamp (Unix)
+slug = f"btc-updown-5m-{window_start_timestamp}"
+r = requests.get(f"https://gamma-api.polymarket.com/events?slug={slug}")
+odds = r.json()[0]["markets"][0]["outcomePrices"]  # e.g. ["0.55", "0.45"]
+poly_prob_up = float(odds[0])
+```
+
+**4. Decide**
+
+```python
+# If model says Up 60% but market says 45% → buy Up
+# If model says Down 70% but market says 40% → buy Down
+# Only trade when |model_prob - poly_prob| > threshold (e.g. 0.15) and account for fees
+```
+
+**5. Place order (manual or via CLOB API)**
+
+- Polymarket CLOB: https://docs.polymarket.com/
+- Or trade manually on https://polymarket.com
+
+**Notes:**
+- TimesFM gives point forecast; for P(Up) use quantiles or train a small wrapper.
+- 5-min BTC is noisy – expect modest edge.
+- Latency matters: run before window starts, place quickly.
+
+---
+
 ## Quick Reference
 
 | Task | Model / Tool |
